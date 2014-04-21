@@ -56,7 +56,7 @@ function SPIframe(track) {
     // This is what the 'inter' element (short for interstitial) does--it's a
     // transparent overlay we use to detect events.
     embedContainer.appendChild(iframe);
-    embedContainer.appendChild(inter());
+    embedContainer.appendChild(inter(track));
 
     return embedContainer;
 }
@@ -183,9 +183,9 @@ function trackByHref(href) {
 }
 
 
-function coverURL(track) {
+function coverURL(track, size) {
     // (1) This function grabs the cover thumbnail URL that the Spotify API 
     // provides us with and modifies it to grab the hi-res, unbranded version
 
-    return track.spotify.thumbnail_url.replace('/cover/', '/640/');
+    return track.spotify.thumbnail_url.replace('/cover/', '/'+ size +'/');
 }

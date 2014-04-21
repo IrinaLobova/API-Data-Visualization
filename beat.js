@@ -71,7 +71,6 @@ function trackDiv(track) {
     return row;
 }
 
-
 function nullify(row) {
     // (2) A function to actually assign the null class to null cells in a row
 
@@ -128,7 +127,8 @@ function rowAttrsFromTrack(track) {
         // more about it at:
         // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Conditional_Operator
         'data-tempo': track.echo ? track.echo.audio_summary.tempo : -1,
-        'data-length': track.echo ? track.echo.audio_summary.duration : -1
+        'data-length': track.echo ? track.echo.audio_summary.duration : -1,
+        'data-duration': track.length
     };
 
     return attrs;
@@ -173,6 +173,11 @@ function placeRow(trackDiv) {
 
 //////////////////////////////////////////////////////////////////////////////
 // Generating individual cells
+function secToMin(duration) {
+    var minutes = Math.floor(duration / 60);
+    var seconds = Math.floor(duration % 60);
+    return minutes + ':' + ((seconds < 10) ? ('0' + seconds) : seconds);
+}
 
 function cellsFromTrackAndAttrs(track, attrs) {
     var cells = [ // A list of pairs containing the 1) class we want in a cell,
@@ -180,14 +185,9 @@ function cellsFromTrackAndAttrs(track, attrs) {
         ['spotify-embed', SPIframe(track, 'compact')],
         ['artist', attrs['data-artist']],
         ['title', attrs['data-title']],
-        ['tempo', attrs['data-tempo'] > 0 ? // if we have a number
-            Math.round(attrs['data-tempo']) : // round it
-            '-'
-        ], // otherwise, display it as '-'
-        ['length', attrs['data-length'] > 0 ? // if we have a number
-            Math.round(attrs['data-length']) : // round it
-            '-'
-        ] // otherwise, display it as '-'
+        ['tempo', // otherwise, display it as '-'
+            attrs['data-tempo'] > 0 ?  Math.round(attrs['data-tempo']) : '-' ],
+        ['duration', secToMin(attrs['data-duration'])] 
     ];
 
     // (1) Iterate over those cells & wrap that content in an appropriate Node
@@ -230,7 +230,7 @@ function setCurrentTrack(track) {
     trackDiv.classList.add('current-track');
 
     // (1) Set the cover album art to the URL grabbed from Spotify metadata
-    document.getElementById('cover').style.backgroundImage = 'url(' + coverURL(track) + ')';
+    document.getElementById('cover').style.backgroundImage = 'url(' + coverURL(track, 640) + ')';
 
     // (1) Modify the displayed artist and track name
     document.getElementById('track-artist').innerHTML = artists(track);
@@ -246,11 +246,13 @@ function setCurrentTrack(track) {
 }
 
 
-function inter() {
+function inter(track) {
     // (1) This function generates a simple div we'll use as an overlay to
     // intercept events
 
     var interstitial = document.createElement('div');
+    console.log(track);
+    //interstitial.style.backgroundImage = 'url(' + coverURL(track, 80) + ')';
     interstitial.setAttribute('class', 'inter');
     interstitial.addEventListener('click', setInters);
 
@@ -363,8 +365,7 @@ function analyse(track) {
     // track object in tracks[]
 
     track.echo = ENSearch(track) || null; // This lets us set a variable to 
-    // the results of ENSearch, or if
-    // there are no results, null
+    // the results of ENSearch, or if there are no results, null
     if (track.echo) { // if we had results
         track.echo.audio_summary = ENAudioSummary(track);
         track.echo.audio_analysis = ENAudioAnalysis(track);
