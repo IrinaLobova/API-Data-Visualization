@@ -15,7 +15,7 @@ var tracks = [];
 
 // (1) We're going to construct our search using Spotify's API, in our case
 // searching for Kanye West and limiting our results to 10 tracks
-var search = 'Kanye West';
+var search = 'Scorpions';
 var maxTracks = 10;
 
 
@@ -243,6 +243,10 @@ function setCurrentTrack(track) {
 
     // (1) Move our container down to display the info-container
     document.getElementById('container').style.top = (240 + 10) + 'px';
+
+    document.getElementById('container').style.background = (track.energy) 
+        ? '#' + Math.round(16777215 * track.energy).toString(16)
+        : "EEE";
 }
 
 
@@ -251,14 +255,14 @@ function inter(track) {
     // intercept events
 
     var interstitial = document.createElement('div');
-    console.log(track);
+    track.energy = track.echo ? track.echo.audio_summary.energy : null;
+    //console.log(track.spotify); TODO: why is it null, try console.log(track);
     //interstitial.style.backgroundImage = 'url(' + coverURL(track, 80) + ')';
     interstitial.setAttribute('class', 'inter');
     interstitial.addEventListener('click', setInters);
 
     return interstitial;
 }
-
 
 function setInters(e) {
     // (1) Every time an .inter is clicked, we want to change the currentTrack
